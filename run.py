@@ -54,6 +54,30 @@ l3 = Label(w, image=imageb,
                justify=CENTER)
 l3.place(x=115, y=100)
 
+def crawl(event):
+    if logincheck == "ok":
+        if event.widget.get() != "과목 선택":
+            curl = "https://ecampus.smu.ac.kr/report/ubcompletion/user_progress.php?id="+dictionary.get(event.widget.get())
+            req = s.get(curl)
+            soup = BeautifulSoup(req.text, 'html.parser')
+            table = soup.find('table', {'class': 'table table-bordered user_progress'})
+            df = pd.read_html(str(table))
+            dataframe = df[0].dropna()
+            dataframe = dataframe[['주','강의 자료', '진도율']]
+            tree1 = tkinter.ttk.Treeview(w, show='headings')
+            tree1.place(x=385,y=100)
+            tree1['columns'] = dataframe.columns.values.tolist()
+            tree1.column("# 1", anchor="center",minwidth=50, width=50, stretch=0)
+            tree1.heading("# 1", anchor="center",text="주차")
+            tree1.column("# 2", anchor="center",minwidth=300, width=300, stretch=0)
+            tree1.heading("# 2", anchor="center",text="강의 내용")
+            tree1.column("# 3", anchor="center",minwidth=70, width=70, stretch=0)
+            tree1.heading("# 3", anchor="center",text="진도율")
+            for index, row in dataframe.iterrows():
+                tree1.insert("", 'end', text=index, values=list(row))
+
+    else:
+        messagebox.showinfo("error", "로그인을 해주세요.")
 
 def login():
     global logincheck
@@ -109,30 +133,7 @@ def login():
 if atlogin == 1:
     login()
 
-def crawl(event):
-    if logincheck == "ok":
-        if event.widget.get() != "과목 선택":
-            curl = "https://ecampus.smu.ac.kr/report/ubcompletion/user_progress.php?id="+dictionary.get(event.widget.get())
-            req = s.get(curl)
-            soup = BeautifulSoup(req.text, 'html.parser')
-            table = soup.find('table', {'class': 'table table-bordered user_progress'})
-            df = pd.read_html(str(table))
-            dataframe = df[0].dropna()
-            dataframe = dataframe[['주','강의 자료', '진도율']]
-            tree1 = tkinter.ttk.Treeview(w, show='headings')
-            tree1.place(x=385,y=100)
-            tree1['columns'] = dataframe.columns.values.tolist()
-            tree1.column("# 1", anchor="center",minwidth=50, width=50, stretch=0)
-            tree1.heading("# 1", anchor="center",text="주차")
-            tree1.column("# 2", anchor="center",minwidth=300, width=300, stretch=0)
-            tree1.heading("# 2", anchor="center",text="강의 내용")
-            tree1.column("# 3", anchor="center",minwidth=70, width=70, stretch=0)
-            tree1.heading("# 3", anchor="center",text="진도율")
-            for index, row in dataframe.iterrows():
-                tree1.insert("", 'end', text=index, values=list(row))
 
-    else:
-        messagebox.showinfo("error", "로그인을 해주세요.")
 
 b1 = Button(w, text="L O G I N", width=20, height=3, fg='white', border=0, bg="#994422", activeforeground='white', activebackground="#994422", command=login)
 b1.config(font=('티머니 둥근바람 ExtraBold', 8))
